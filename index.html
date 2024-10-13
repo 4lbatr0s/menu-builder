@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Etkileşimli Menü Oluşturucu</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap');
+        
+        :root {
+            --primary-color: #4CAF50;
+            --secondary-color: #45a049;
+            --background-color: #f0f0f0;
+            --text-color: #333;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body, html {
+            font-family: 'Poppins', sans-serif;
+            height: 100vh;
+            color: var(--text-color);
+            background-color: var(--background-color);
+        }
+
+        .app-container {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+
+        #controls {
+            padding: 20px;
+            background-color: white;
+            overflow-y: auto;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        #preview {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        header {
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+
+        h1 {
+            margin: 0;
+            font-size: 1.8em;
+            font-weight: 600;
+        }
+
+        .date-range {
+            font-size: 1em;
+            margin-top: 5px;
+            font-weight: 300;
+        }
+
+        main {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-around;
+            padding: 20px;
+        }
+
+        .menu-item {
+            background: white;
+            border-radius: 15px;
+            padding: 15px;
+            margin: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            transition: transform 0.3s ease;
+            flex: 1 1 100%;
+            max-width: 100%;
+        }
+
+        .menu-item:hover {
+            transform: translateY(-5px);
+        }
+
+        h2 {
+            margin-bottom: 10px;
+            font-weight: 600;
+            font-size: 1.1em;
+            text-align: center;
+        }
+
+        h3 {
+            margin-top: 20px;
+            margin-bottom: 10px;
+            color: var(--primary-color);
+        }
+
+        ul {
+            list-style-type: none;
+        }
+
+        li {
+            margin-bottom: 8px;
+            font-size: 0.9em;
+            display: flex;
+            align-items: center;
+        }
+
+        li::before {
+            content: attr(data-emoji);
+            margin-right: 5px;
+            font-size: 1.2em;
+        }
+
+        footer {
+            color: white;
+            text-align: center;
+            padding: 15px;
+            font-size: 0.9em;
+        }
+
+        /* Control panel styles */
+        #controls input, #controls select, #controls button {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 1em;
+        }
+
+        #controls button {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        #controls button:hover {
+            background-color: var(--secondary-color);
+        }
+
+        /* Gradient selection styles */
+        .gradient-preview {
+            height: 40px;
+            border-radius: 5px;
+            margin-bottom: 10px;
+        }
+
+        /* Media Queries */
+        @media screen and (min-width: 768px) {
+            .app-container {
+                flex-direction: row;
+            }
+
+            #controls {
+                width: 30%;
+                max-width: 300px;
+            }
+
+            #preview {
+                width: 70%;
+            }
+
+            .menu-item {
+                flex: 1 1 calc(50% - 20px);
+                max-width: calc(50% - 20px);
+            }
+        }
+
+        @media screen and (min-width: 1024px) {
+            .menu-item {
+                flex: 1 1 calc(33.33% - 20px);
+                max-width: calc(33.33% - 20px);
+            }
+        }
+
+        /* Download buttons */
+        .download-buttons {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+        }
+
+        .download-buttons button {
+            margin: 5px;
+            padding: 10px 15px;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .download-buttons button:hover {
+            background-color: var(--secondary-color);
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+
+        <div id="controls">
+            <h3>Menü Ayarları</h3>
+            <input type="text" id="titleInput" placeholder="Menü Başlığı">
+            <input type="text" id="dateRangeInput" placeholder="Tarih Aralığı">
+            <input type="text" id="footerMessage" placeholder="Alt Bilgi Mesajı">
+            
+            <h3>Arkaplan Rengi</h3>
+            <div class="gradient-preview" id="gradientPreview"></div>
+            <input type="color" id="gradientColor1" value="#FF512F">
+            <input type="color" id="gradientColor2" value="#DD2476">
+            <button onclick="updateGradient()">Gradyanı Güncelle</button>
+            
+            <h3>Gün Ekle</h3>
+            <input type="text" id="dayInput" placeholder="Gün (örn. Pazartesi)">
+            <input type="text" id="dateInput" placeholder="Tarih (örn. 14 Ekim)">
+            <button onclick="addDay()">Gün Ekle</button>
+            
+            <h3>Yemek Ekle</h3>
+            <select id="daySelect"></select>
+            <input type="text" id="foodInput" placeholder="Yemek Adı">
+            <select id="foodType">
+                <option value="soup">Çorba</option>
+                <option value="main">Ana Yemek</option>
+                <option value="side">Yan Yemek</option>
+                <option value="dessert">Tatlı</option>
+                <option value="salad">Salata</option>
+                <option value="drink">İçecek</option>
+            </select>
+            <button onclick="addFood()">Yemek Ekle</button>
+            
+            <h3>Menüyü Güncelle</h3>
+            <button onclick="updateMenu()">Menüyü Güncelle</button>
+        </div>
+
+        <div id="preview">
+            <div class="container" id="menuContent">
+                <header id="header">
+                    <h1 id="title">Etkileşimli Menü Oluşturucu</h1>
+                    <div id="dateRange" class="date-range">Tarih aralığınızı seçin</div>
+                </header>
+                <main id="menuContainer">
+                    <!-- Menü öğeleri buraya dinamik olarak eklenecek -->
+                </main>
+                <footer id="footer">
+                    <p id="footerText">Alt bilgi mesajınızı özelleştirin</p>
+                </footer>
+            </div>
+        </div>
+
+        <div class="download-buttons">
+            <button onclick="downloadPDF()">PDF Olarak İndir</button>
+            <button onclick="downloadPNG()">PNG Olarak İndir</button>
+        </div>
+    </div>
+
+    <script>
+        let menuData = [];
+        let currentGradient = 'linear-gradient(45deg, #FF512F, #DD2476)';
+
+        function getEmoji(type) {
+            const emojis = {
+                soup: '🍲',
+                main: '🍽️',
+                side: '🍚',
+                dessert: '🍰',
+                salad: '🥗',
+                drink: '🥤',
+            };
+            return emojis[type] || '🍴';
+        }
+
+        function renderMenu() {
+            const container = document.getElementById('menuContainer');
+            container.innerHTML = ''; // Mevcut içeriği temizle
+
+            menuData.forEach(day => {
+                const dayElement = document.createElement('div');
+                dayElement.className = 'menu-item';
+                
+                const dateElement = document.createElement('h2');
+                dateElement.textContent = `${day.day}\n${day.date}`;
+                dateElement.style.color = currentGradient.split(',')[0].split('(')[1];
+                dayElement.appendChild(dateElement);
+
+                const menuList = document.createElement('ul');
+                day.menu.forEach(item => {
+                    const menuItem = document.createElement('li');
+                    menuItem.textContent = item.name;
+                    menuItem.dataset.emoji = getEmoji(item.type);
+                    menuList.appendChild(menuItem);
+                });
+
+                dayElement.appendChild(menuList);
+                container.appendChild(dayElement);
+            });
+
+            const header = document.getElementById('header');
+            const footer = document.getElementById('footer');
+            header.style.background = currentGradient;
+            footer.style.background = currentGradient;
+        }
+
+        function updateMenu() {
+            const title = document.getElementById('titleInput').value;
+            const dateRange = document.getElementById('dateRangeInput').value;
+            const footerMessage = document.getElementById('footerMessage').value;
+
+            document.getElementById('title').textContent = title || 'Etkileşimli Menü Oluşturucu';
+            document.getElementById('dateRange').textContent = dateRange || 'Tarih aralığınızı seçin';
+            document.getElementById('footerText').textContent = footerMessage || 'Alt bilgi mesajınızı özelleştirin';
+
+            renderMenu();
+            saveToLocalStorage();
+        }
+
+        function addDay() {
+            const day = document.getElementById('dayInput').value;
+            const date = document.getElementById('dateInput').value;
+            if (day && date) {
+                menuData.push({ day, date, menu: [] });
+                updateDaySelect();
+                document.getElementById('dayInput').value = '';
+                document.getElementById('dateInput').value = '';
+                saveToLocalStorage();
+            } else {
+                alert('Lütfen hem gün hem de tarih girin.');
+            }
+        }
+
+        function addFood() {
+            const dayIndex = document.getElementById('daySelect').value;
+            const foodName = document.getElementById('foodInput').value;
+            const foodType = document.getElementById('foodType').value;
+            if (dayIndex !== '' && foodName) {
+                menuData[dayIndex].menu.push({ name: foodName, type: foodType });
+                document.getElementById('foodInput').value = '';
+                saveToLocalStorage();
+            } else {
+                alert('Lütfen bir gün seçin ve yemek adı girin.');
+            }
+        }
+
+        function updateDaySelect() {
+            const daySelect = document.getElementById('daySelect');
+            daySelect.innerHTML = '';
+            menuData.forEach((day, index) => {
+                const option = document.createElement('option');
+                option.value = index;
+                option.textContent = `${day.day} (${day.date})`;
+                daySelect.appendChild(option);
+            });
+        }
+
+        function updateGradient() {
+            const color1 = document.getElementById('gradientColor1').value;
+            const color2 = document.getElementById('gradientColor2').value;
+            currentGradient = `linear-gradient(45deg, ${color1}, ${color2})`;
+            document.getElementById('gradientPreview').style.background = currentGradient;
+            renderMenu();
+            saveToLocalStorage();
+        }
+
+        function saveToLocalStorage() {
+            localStorage.setItem('menuData', JSON.stringify(menuData));
+            localStorage.setItem('menuSettings', JSON.stringify({
+                title: document.getElementById('titleInput').value,
+                dateRange: document.getElementById('dateRangeInput').value,
+                footerMessage: document.getElementById('footerMessage').value,
+                gradient: currentGradient
+            }));
+        }
+
+        function loadFromLocalStorage() {
+            const savedMenuData = localStorage.getItem('menuData');
+            const savedSettings = localStorage.getItem('menuSettings');
+            
+            if (savedMenuData) {
+                menuData = JSON.parse(savedMenuData);
+                updateDaySelect();
+            }
+            
+            if (savedSettings) {
+                const settings = JSON.parse(savedSettings);
+                document.getElementById('titleInput').value = settings.title || '';
+                document.getElementById('dateRangeInput').value = settings.dateRange || '';
+                document.getElementById('footerMessage').value = settings.footerMessage || '';
+                currentGradient = settings.gradient || currentGradient;
+                const [color1, color2] = currentGradient.match(/#[a-fA-F0-9]{6}/g) || ['#FF512F', '#DD2476'];
+                document.getElementById('gradientColor1').value = color1;
+                document.getElementById('gradientColor2').value = color2;
+                document.getElementById('gradientPreview').style.background = currentGradient;
+            }
+            
+            updateMenu();
+        }
+
+        window.onload = function() {
+            loadFromLocalStorage();
+        };
+
+        // Function to download the menu as PDF
+        function downloadPDF() {
+            const element = document.getElementById('menuContent');
+            html2pdf(element, {
+                margin: 1,
+                filename: 'menu.pdf',
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { scale: 2, useCORS: true },
+                jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
+            });
+        }
+
+        // Function to download the menu as PNG
+        function downloadPNG() {
+            html2canvas(document.getElementById('menuContent')).then(canvas => {
+                const link = document.createElement('a');
+                link.download = 'menu.png';
+                link.href = canvas.toDataURL();
+                link.click();
+            });
+        }
+    </script>
+    <!-- Add html2pdf and html2canvas libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.3/html2pdf.bundle.min.js"></script>    
+</body>
+</html>
